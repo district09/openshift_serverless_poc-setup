@@ -1,0 +1,18 @@
+<?xml version="1.0"?> 
+<settings>
+    <mirrors>
+        <mirror>
+            <id>digipolis_nexus</id>
+            <name>Maven Repository Manager at Digipolis</name>
+            <url>https://nexussfqa.gent.be/repository/maven-public/</url>
+            <mirrorOf>*</mirrorOf>
+        </mirror>
+    </mirrors>
+    <servers>
+        <server>
+            <id>digipolis_nexus</id>
+            <username>${env.NEXUS_USER}</username>
+            <password>${env.NEXUS_PASSWORD}</password>
+        </server>
+    </servers>
+</settings>

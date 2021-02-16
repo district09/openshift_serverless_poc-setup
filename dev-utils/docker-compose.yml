@@ -1,0 +1,49 @@
+version: '2.1'
+services:
+  
+  mssql:
+    image: mssql
+    ports:
+    - "1433:1433"
+    environment:
+      ACCEPT_EULA: y
+      SA_PASSWORD: DEV-pw-123
+    healthcheck:
+      test: ['CMD', "/opt/mssql-tools/bin/sqlcmd", "-S", "127.0.0.1", "-U", "sa", "-P", "DEV-pw-123", "-d", "develop", "-Q", "'select 1'"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+  
+  amq:
+    image: amq
+    ports:
+    - "61616:61616"   # Openwire
+    - "61613:61613"
+    - "1883:1883"
+    - "8161:8161"     # web console
+  
+  component1:
+    image: component-1
+    ports:
+    - "8080:8080"
+    environment:
+      ENVAR1: envar1
+      ENVAR2: envar2
+    depends_on: # required to start up database before services in most cases!
+      amq:
+        condition: service_started
+      mssql:
+        condition: service_healthy
+  
+  component2:
+    image: component-2
+    ports:
+    - "8081:8080"
+    environment:
+      ENVAR1: envar1
+      ENVAR2: envar2
+    depends_on: # required to start up database before services in most cases!
+      amq:
+        condition: service_started
+      mssql:
+        condition: service_healthy

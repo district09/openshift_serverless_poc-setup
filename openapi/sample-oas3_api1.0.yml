@@ -1,0 +1,187 @@
+openapi: 3.0.0
+info:
+  description: Write a short description of the API here. 
+  version: "1.0"
+  title: SERVICENAME API
+  contact:
+    email: servicefactory@digipolis.gent
+servers:
+  - description: District09 API DV Gateway
+    url: https://apidgdv:443/{basePath}
+    variables:
+      basePath: 
+        default: /NAMESPACE/SERVICENAME/v1/
+  - description: District09 API QA Gateway
+    url: https://apidgqa:443/{basePath}
+    variables:
+      basePath: 
+        default: /NAMESPACE/SERVICENAME/v1/
+  - description: District09 API PR Gateway
+    url: https://apidg:443/{basePath}
+    variables:
+      basePath: 
+        default: /NAMESPACE/SERVICENAME/v1/
+tags:
+  - name: object 
+    description: All operations on a object
+  - name: health
+    description: All health checks on the service
+paths:
+  '/object':
+    post: 
+      tags:
+        - object
+      summary: Create or update a object (upsert)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/object'
+      parameters:
+      - name: apiKey
+        in: header
+        description: The value of the apiKey header is used to verify access to the service.
+        required: true
+        type: string
+        format: uuid
+      - name: applicationId
+        in: header
+        description: The value of the applicationId header is used for access control to resources and endpoints.
+        required: true
+        type: string
+        format: uuid
+      - name: correlationId
+        in: header
+        description: The value of the correlationId header is used for correlating distributed actions in the log file.
+        required: false
+        type: string
+        format: uuid      
+      responses:
+        '200':
+          description: Successfully upserted the object
+        '400':
+          description: Bad request - validation errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problemDetails'
+        '404':
+          description: The object was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problemDetails'
+        '409':
+          description: Found multiple objects for this login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problemDetails'
+        '422':
+          description: Could not process the request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problemDetails'
+        '500':
+          description: Internal server error 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problemDetails'
+...
+  '/status/am-i-up':
+    get:
+      tags:
+        - health
+      responses:
+        "200":
+          description: Success
+  '/status/about':
+    get:
+      tags:
+        - health
+      responses:
+        "200":
+          description: Success
+  '/status/aggregate':
+    get:
+      tags:
+        - health
+      parameters:
+        - name: type
+          in: query
+          schema:
+            enum:
+              - 0
+              - 1
+              - 2
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: Success
+  '/status/traverse':
+    get:
+      tags:
+        - health
+      parameters:
+        - name: dependencies
+          in: query
+          schema:
+            type: string
+            default: ""
+        - name: action
+          in: query
+          schema:
+            type: string
+            default: about
+      responses:
+        "501":
+          description: Server Error
+  '/status/{dependency}':
+    get:
+      tags:
+        - health
+      parameters:
+        - name: dependency
+          in: path
+          required: true
+          schema:
+            type: string
+            default: ""
+      responses:
+        "200":
+          description: Success
+components:
+  schemas:
+    object:
+      type: object
+      required:
+      - propertyA    
+      properties:
+        propertyA:
+          type: string
+        propertyB:
+          type: string
+        propertyC:
+          type: string
+        propertyD:
+          type: string
+...
+    problemDetails:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+          description: http status code
+        detail:
+          type: string
+        extensions:
+          type: object
+...
